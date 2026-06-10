@@ -1,4 +1,4 @@
-# Quantitative-single-cell-worflow-cytospin-based-
+# Quantitative-single-cell-worflow-cytospin
 A base quantitative R based workflow for single cell analysis. The workflow is based on the intensity measurements captured by either olympus slide scanner. This workflow was developed with cytopsin/PFA fixed cell line samples (Untreated/Treated).
 
 In this workflow, the images were processed in QuPath and segmented with Instanseg extension in QuPath. After manually validated the segmentation, the measurements were exported as detections in a CSV file. 
