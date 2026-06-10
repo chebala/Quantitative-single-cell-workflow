@@ -1,7 +1,4 @@
 
-##18/5/2026##
-
-
 # ===============================================================================
 # 1. SETUP AND PACKAGE LOADING
 # ===============================================================================
@@ -63,11 +60,11 @@ output_dir <- "E:/QmIF/output/limma"  # Output directory for plots and tables
 # Create output directory if it doesn't exist
 dir.create(output_dir, showWarnings = FALSE)
 
-# Define cell lines
+# Define cell lines (define your cell lines here)
 cell_lines <- c("Z-138", "SU-DHL-4", "SU-DHL-6", "SU-DHL-8")
 
-# Define treatment conditions
-
+# Define treatment conditions (define your treatment conditions here) 
+#I have 6 conditions including 3 single-agent treatment and two combinaotrial treatment
 
 treatments <- c(
   "Untreated",
@@ -80,12 +77,10 @@ treatments <- c(
 
 
 
-
-
-# Define markers
+# Define markers (mention then markers that you want to analyze)
 markers <- c("MYC", "PLK1", "BCL2", "P53")
 
-# Define publication-quality theme
+# Define theme (I used a standardized theme across all of my plots)
 theme_publication <- function(base_size = 12) {
   theme_bw(base_size = base_size) +
     theme(
@@ -152,6 +147,7 @@ cell_line_colors <- c(
 #' @param data_dir Directory containing QuPath CSV exports
 #' @return Combined dataframe with all single-cell measurements
 #' Import QuPath CSV files with Fuzzy Auto-Matching
+# In each step, it is good to have a stop the function if the required file is not found as it might give false results in the downstream analysis
 import_qupath_data <- function(data_dir) {
   cat("Importing QuPath data...\n")
   
