@@ -22,7 +22,7 @@ required_packages <- c(
   "RColorBrewer", # Color palettes
   "effectsize",   # effect size bcl2 distribution (ADDED MISSING COMMA)
   "limma" ,       # the main character
-  "lmerTest"
+  "lmerTest"      # linear mixed effect model
 )
 
 # 1. Install standard CRAN packages first (excluding limma)
@@ -32,7 +32,7 @@ if(length(missing_cran) > 0) {
   install.packages(missing_cran, dependencies = TRUE)
 }
 
-# 2. Install limma via BiocManager (The correct way for Bioconductor packages)
+# 2. Install limma via BiocManager (Therough Bioconductor packages)
 if (!"limma" %in% installed.packages()[,"Package"]) {
   if (!"BiocManager" %in% installed.packages()[,"Package"]) {
     install.packages("BiocManager", dependencies = TRUE)
