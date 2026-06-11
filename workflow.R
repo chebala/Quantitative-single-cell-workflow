@@ -21,7 +21,7 @@ required_packages <- c(
   "scales",       # Plot scaling
   "RColorBrewer", # Color palettes
   "effectsize",   # effect size bcl2 distribution (ADDED MISSING COMMA)
-  "limma" ,       # the main character
+  "limma" ,       # limma package
   "lmerTest"      # linear mixed effect model
 )
 
@@ -1002,7 +1002,7 @@ run_analysis <- function(data_dir, viability_file, output_dir) {
   
   # Filter missing values manually here to capture the audit baseline checkpoint
   stage1_data <- extracted_data %>%
-    filter(!is.na(MYC) & !is.na(PLK1) & !is.na(BCL2) & !is.na(P53))
+    filter(!is.na(Marker_1) & !is.na(Marker_2) & !is.na(Marker_3) & !is.na(Marker_4))
   
   stage1_counts <- stage1_data %>%
     group_by(CellLine, Treatment, SlideID) %>%
@@ -1085,7 +1085,6 @@ run_analysis <- function(data_dir, viability_file, output_dir) {
   # 2G. Build your cell line grouped integrated heatmap with dividing line blocks
   heatmap_package <- create_integrated_heatmap(limma_statistics, viability_data, output_dir)
   
-  # === ADD THE COMPREHENSIVE NON-PARAMETRIC DISTRIBUTION CALL HERE ===
   distribution_statistics <- analyze_all_marker_distributions(single_cell_transformed, markers, output_dir)
   # ===================================================================
   
@@ -1095,7 +1094,7 @@ run_analysis <- function(data_dir, viability_file, output_dir) {
     sample_medians        = sample_level_data,
     pca_results           = pca_outputs,
     limma_results         = limma_statistics,
-    distribution_stats    = distribution_statistics, # Added tracking node here
+    distribution_stats    = distribution_statistics, 
     heatmap_data          = heatmap_package,
     filtration_report     = filtration_audit,
     viability             = viability_data
