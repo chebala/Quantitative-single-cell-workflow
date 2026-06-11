@@ -55,30 +55,30 @@ library(ggrepel)
 # Define paths (UPDATE THESE TO YOUR DATA LOCATIONS)
 data_dir <- "E:/QmIF/qupath/export"  # Directory containing CSV files
 viability_file <- "N:/Master thesis/Combinatorial treatment/synergy_analysis/data/combinatorial_treatment_tidy_data.xlsx"  # Path to viability Excel file
-output_dir <- "E:/QmIF/output/limma"  # Output directory for plots and tables
+output_dir <- "E:/QmIF/output"  # Output directory for plots and tables
 
 # Create output directory if it doesn't exist
 dir.create(output_dir, showWarnings = FALSE)
 
 # Define cell lines (define your cell lines here)
-cell_lines <- c("Z-138", "SU-DHL-4", "SU-DHL-6", "SU-DHL-8")
+cell_lines <- c("Cell_line_1", "Cell_line_2", "Cell_line_3", "Cell_line_4")
 
 # Define treatment conditions (define your treatment conditions here) 
 #I have 6 conditions including 3 single-agent treatment and two combinaotrial treatment
 
 treatments <- c(
-  "Untreated",
-  "Venetoclax_IC50",
-  "Volasertib_IC50",
-  "Volasertib_IC25",
-  "Combo_IC50IC50",  
-  "Combo_IC50IC25"  
-)
+  "Untreated",  # Make sure to have a condition that can be used as a baseline to determine the treatment induced expression shifts
+  "Condition_1", 
+  "Condition_2",
+  "Condition_3",
+  "Condition_4",  
+  "Condition_5"  
+) # You can include more conditions but make sure to include them in the downstream analysis
 
 
 
 # Define markers (mention then markers that you want to analyze)
-markers <- c("MYC", "PLK1", "BCL2", "P53")
+markers <- c("Marker_1", "Marker_2", "Marker_3", "Marker_4")
 
 # Define theme (I used a standardized theme across all of my plots)
 theme_publication <- function(base_size = 12) {
@@ -120,19 +120,19 @@ theme_set(theme_publication())
 # Define color palette
 
 treatment_colors <- c(
-  "Untreated"       = "#1F77B4",
-  "Venetoclax_IC50" = "#FF7F0E",
-  "Volasertib_IC50" = "#2CA02C",
-  "Volasertib_IC25" = "#D62728",
-  "Combo_IC50IC50"  = "#9467BD", 
-  "Combo_IC50IC25"  = "#8C564B"  
+  "Untreated"       = "#1F77B4", 
+  "Condition_1" = "#FF7F0E",
+  "Condition_2" = "#2CA02C",
+  "Condition_3" = "#D62728",
+  "Condition_4"  = "#9467BD", 
+  "Condition_5"  = "#8C564B"  
 )
 
 cell_line_colors <- c(
-  "Z-138" = "#E41A1C",
-  "SU-DHL-4" = "#377EB8",
-  "SU-DHL-6" = "#4DAF4A",
-  "SU-DHL-8" = "#984EA3"
+  "Cell_line_1" = "#E41A1C",
+  "Cell_line_2" = "#377EB8",
+  "Cell_line_3" = "#4DAF4A",
+  "Cell_line_4" = "#984EA3"
 )
 
 # ===============================================================================
@@ -169,11 +169,12 @@ import_qupath_data <- function(data_dir) {
     raw_cell <- parts[1]
     
     # 1. Standardize Cell Line text variants safely
+    # Here I have taken 4 cell lines and tried to standardize the names before using them in the pipelines
     df$CellLine <- case_when(
-      raw_cell %in% c("SUDHL4", "SU-DHL-4", "SUDHL-4") ~ "SU-DHL-4",
-      raw_cell %in% c("SUDHL6", "SU-DHL-6", "SUDHL-6") ~ "SU-DHL-6",
-      raw_cell %in% c("SUDHL8", "SU-DHL-8", "SUDHL-8") ~ "SU-DHL-8",
-      raw_cell %in% c("Z138", "Z-138")                ~ "Z-138",
+      raw_cell %in% c("Cellline1", "Cell_line-1") ~ "Cell_line_1",
+      raw_cell %in% c("Cellline2", "Cell_line-2") ~ "Cell_line_2",
+      raw_cell %in% c("Cellline3", "Cell_line-3") ~ "Cell_line_3",
+      raw_cell %in% c("Cellline4", "Cell_line-4") ~ "Cell_line_4",
       TRUE ~ raw_cell
     )
     
@@ -184,28 +185,29 @@ import_qupath_data <- function(data_dir) {
     raw_treat_clean <- gsub(" ", "_", raw_treat)
     raw_treat_clean <- gsub("\\+", "_", raw_treat_clean)
     raw_treat_clean <- gsub("__", "_", raw_treat_clean)
-    
-    # Match strings flexibly to lock down exact factor levels for Limma
+    # Here I have used some condition to find them in the df (This is just a example you have to specify the condition names by yourself
+    #Tip: Try to use unique names as it is easier to use grepl function 
+    # Match strings flexibly to lock down exact factor levels
     df$Treatment <- case_when(
       tolower(raw_treat_clean) == "untreated" ~ "Untreated",
       
-      grepl("venetoclax", tolower(raw_treat_clean)) & 
-        grepl("ic50", tolower(raw_treat_clean)) & 
-        !grepl("vola", tolower(raw_treat_clean)) ~ "Venetoclax_IC50",
+      grepl("Condition", tolower(raw_treat_clean)) & 
+        grepl("1", tolower(raw_treat_clean)) & 
+        !grepl("_1", tolower(raw_treat_clean)) ~ "Condition_1",
       
-      grepl("volasertib", tolower(raw_treat_clean)) & 
-        grepl("ic50", tolower(raw_treat_clean)) & 
-        !grepl("ven", tolower(raw_treat_clean)) ~ "Volasertib_IC50",
+      grepl("Condition", tolower(raw_treat_clean)) & 
+        grepl("2", tolower(raw_treat_clean)) & 
+        !grepl("_2", tolower(raw_treat_clean)) ~ "Condition_2",
       
-      grepl("volasertib", tolower(raw_treat_clean)) & 
-        grepl("ic25", tolower(raw_treat_clean)) & 
-        !grepl("ven", tolower(raw_treat_clean)) ~ "Volasertib_IC25",
+      grepl("Condition", tolower(raw_treat_clean)) & 
+        grepl("3", tolower(raw_treat_clean)) & 
+        !grepl("_3", tolower(raw_treat_clean)) ~ "Condition_3",
       
-      grepl("ven", tolower(raw_treat_clean)) & grepl("ic50", tolower(raw_treat_clean)) & 
-        grepl("vola", tolower(raw_treat_clean)) & grepl("ic50", tolower(raw_treat_clean)) ~ "Venetoclax_IC50_Volasertib_IC50",
+      grepl("Cond", tolower(raw_treat_clean)) & grepl("Condition", tolower(raw_treat_clean)) & 
+        grepl("4", tolower(raw_treat_clean)) & grepl("_4", tolower(raw_treat_clean)) ~ "Condition_4",
       
-      grepl("ven", tolower(raw_treat_clean)) & grepl("ic50", tolower(raw_treat_clean)) & 
-        grepl("vola", tolower(raw_treat_clean)) & grepl("ic25", tolower(raw_treat_clean)) ~ "Venetoclax_IC50_Volasertib_IC25",
+      grepl("Cond", tolower(raw_treat_clean)) & grepl("Condition", tolower(raw_treat_clean)) & 
+        grepl("5", tolower(raw_treat_clean)) & grepl("_5", tolower(raw_treat_clean)) ~ "Condition_5",
       
       TRUE ~ raw_treat # Fallback if something doesn't match
     )
@@ -246,25 +248,25 @@ clean_column_names <- function(df) {
 #' @return Dataframe with extracted marker intensities
 extract_marker_intensities <- function(df, markers) {
   cat("Extracting marker intensities...\n")
-  
+  # I have taken median instead of mean for the intensity value of each marker in specific compartments, you have to know your marker and you should know where your markers were expected to be found (nucleus/cytoplasm/cell membrane)
   # Expanded mapping list trying every possible QuPath capitalization and format
-  myc_cols  <- c("Nucleus: MYC: Median", "MYC:_Median", "Nucleus__MYC__Median", "MYC_Median", "MYC", "Nucleus: MYC mean", "MYC_mean")
-  plk1_cols <- c("Nucleus: PLK1: Median", "Nucleus_PLK1:_Median", "Nucleus__PLK1__Median", "Nucleus_PLK1_Median", "PLK1", "Nucleus: PLK1 mean", "PLK1_mean","PLK1:_Median")
-  bcl2_cols <- c("Cell: BCL2: Median", "Cell_BCL2:_Median", "Cell__BCL2__Median", "Cell_BCL2_Median", "BCL2", "Cell: BCL2 mean", "BCL2_mean")
-  p53_nuc   <- c("Nucleus: P53: Median", "P53:_Median", "Nucleus__P53__Median", "P53_Median", "P53", "Nucleus: P53 mean", "P53_mean")
+  marker_1_cols  <- c("Nucleus: Marker_1: Median", "Marker_1:_Median", "__Marker_1__Median", "Marker_1_Median", "Marker_1", "Nucleus: Marker_1 mean", "Marker_1_mean")
+  marker_2_cols <- c("Nucleus: Marker_2: Median", "Nucleus_Marker_2:_Median", "Nucleus__Marker_2__Median", "Nucleus_Marker_2_Median", "Marker_2", "Nucleus: Marker_2 mean", "Marker_2_mean","Marker_2:_Median")
+  marker_3_cols <- c("Cell: Marker_3: Median", "Cell_Marker_3:_Median", "Cell__Marker_3_Median", "Cell_Marker_3_Median", "Marker_3", "Cell: Marker_3 mean", "Marker_3_mean")
+  marker_4_cols   <- c("Nucleus: Marker_4: Median", "Marker_4:_Median", "Nucleus__Marker_4__Median", "Marker_4_Median", "Marker_4", "Nucleus: Marker_4 mean", "Marker_4_mean")
   
   # Find which column actually exists
-  actual_myc  <- intersect(myc_cols, colnames(df))
-  actual_plk1 <- intersect(plk1_cols, colnames(df))
-  actual_bcl2 <- intersect(bcl2_cols, colnames(df))
-  actual_p53  <- intersect(p53_nuc, colnames(df))
+  actual_marker_1  <- intersect(marker_1_cols, colnames(df))
+  actual_marker_2 <- intersect(marker_2_cols, colnames(df))
+  actual_marker_3 <- intersect(marker_3_cols, colnames(df))
+  actual_marker_4  <- intersect(marker_4_cols, colnames(df))
   
   # Build the renaming named vector dynamically
   rename_list <- c()
-  if (length(actual_myc) > 0)  rename_list["MYC"]  <- actual_myc[1]
-  if (length(actual_plk1) > 0) rename_list["PLK1"] <- actual_plk1[1]
-  if (length(actual_bcl2) > 0) rename_list["BCL2"] <- actual_bcl2[1]
-  if (length(actual_p53) > 0)  rename_list["P53"]  <- actual_p53[1]
+  if (length(actual_marker_1) > 0)  rename_list["Marker_1"]  <- actual_marker_1[1]
+  if (length(actual_marker_2) > 0) rename_list["Marker_2"] <- actual_marker_2[1]
+  if (length(actual_marker_3) > 0) rename_list["Marker_3"] <- actual_marker_3[1]
+  if (length(actual_marker_4) > 0)  rename_list["Marker_4"]  <- actual_marker_4[1]
   
   if (length(rename_list) > 0) {
     df <- df %>% rename(any_of(rename_list))
@@ -293,7 +295,7 @@ filter_low_quality_cells <- function(df) {
   
   # Filter 1: Remove cells with missing marker values
   df <- df %>%
-    filter(!is.na(MYC) & !is.na(PLK1) & !is.na(BCL2) & !is.na(P53))
+    filter(!is.na(Marker_1) & !is.na(Marker_2) & !is.na(Marker_3) & !is.na(Marker_4))
   
   # Filter 2: Remove cells with extreme area values (potential debris or clumps)
   if ("Nucleus_Area_um2" %in% colnames(df)) {
@@ -452,7 +454,7 @@ run_cell_line_specific_pca <- function(df, markers, title_prefix, file_suffix, s
 }
 
 #=================================================================================
-# 5 Plotting (Ridge and PCA)
+# 5 Plotting (Ridge)
 #=================================================================================
 
 #' Generate Distributional Ridge Plots
@@ -493,13 +495,13 @@ generate_ridge_plots <- function(df, markers, output_dir) {
 
 
 #===============================================================================
-# 6 Limma analysis pipeline
+# 6 Single-Cell Mixed effects model
 #===============================================================================
 #' Single-Cell Mixed Effects Statistical Engine with Robust Descriptive Effect Sizes
 #' 
 #' Natively handles individual cells as replicates while computing highly stable 
 #' Cohen's d effect sizes directly from pooled single-cell variances to prevent optim crashes.
-run_limma_analysis <- function(single_cell_df, markers, output_dir) {
+mixed_effect_model <- function(single_cell_df, markers, output_dir) {
   cat("Initializing Single-Cell Mixed-Effects Model Regression with Robust Effect Sizes...\n")
   library(lmerTest)
   
@@ -579,7 +581,7 @@ run_limma_analysis <- function(single_cell_df, markers, output_dir) {
         abs(Cohens_d) >= 0.8 ~ "Large"
       ),
       Interpretation = case_when(
-        !grepl(":", Term) ~ paste("Global drug shift inside reference cell line (Z_138)"),
+        !grepl(":", Term) ~ paste("Global drug shift inside reference cell line (Cell_line_1)"),
         grepl(":", Term)  ~ paste("Specific modification of drug response unique to this cell line background")
       )
     )
@@ -792,10 +794,10 @@ create_integrated_heatmap <- function(mixed_results, viability_data, output_dir)
     mutate(
       Treatment = clean_text_format(Conditions),
       CellLine_Clean = case_when(
-        CellLine %in% c("SUDHL4", "SUDHL_4", "SU-DHL-4") ~ "SU_DHL_4",
-        CellLine %in% c("SUDHL6", "SUDHL_6", "SU-DHL-6") ~ "SU_DHL_6",
-        CellLine %in% c("SUDHL8", "SUDHL_8", "SU-DHL-8") ~ "SU_DHL_8",
-        TRUE ~ "Z_138"
+        CellLine %in% c("Cellline2", "Cell_line-2") ~ "Cell_line_2",
+        CellLine %in% c("Cellline3", "Cell_line-3") ~ "Cell_line_3",
+        CellLine %in% c("Cellline4", "Cell_line-4") ~ "Cell_line_4",
+        TRUE ~ "Cell_line_1"
       )
     ) %>%
     select(CellLine = CellLine_Clean, Treatment, mean_inhibition)
@@ -804,10 +806,10 @@ create_integrated_heatmap <- function(mixed_results, viability_data, output_dir)
   protein_wide <- mixed_results %>%
     mutate(
       CellLine = case_when(
-        grepl("SU_DHL_4", Term, ignore.case = TRUE) ~ "SU_DHL_4",
-        grepl("SU_DHL_6", Term, ignore.case = TRUE) ~ "SU_DHL_6",
-        grepl("SU_DHL_8", Term, ignore.case = TRUE) ~ "SU_DHL_8",
-        TRUE ~ "Z_138" 
+        grepl("Cell_line_2", Term, ignore.case = TRUE) ~ "Cell_line_2",
+        grepl("Cell_line_3", Term, ignore.case = TRUE) ~ "Cell_line_3",
+        grepl("Cell_line_4", Term, ignore.case = TRUE) ~ "Cell_lin_4",
+        TRUE ~ "Cell_line_1" 
       ),
       Clean_Treat = gsub("Treatment", "", Term),
       Treatment = gsub(":.*", "", Clean_Treat),
@@ -878,7 +880,6 @@ create_integrated_heatmap <- function(mixed_results, viability_data, output_dir)
 
 
 
-#Nice table#
 #' Automatically Deconvolute Interaction Terms into True Cell-Line Responses
 #' 
 #' @param mixed_results Dataframe generated by run_limma_analysis (results$limma_results)
@@ -1079,7 +1080,7 @@ run_analysis <- function(data_dir, viability_file, output_dir) {
 
   
   # 2F. Calculate robust linear models using single cells as nested replicates
-  limma_statistics <- run_limma_analysis(single_cell_transformed, markers, output_dir)
+  limma_statistics <- mixed_effect_model(single_cell_transformed, markers, output_dir)
   
   # 2G. Build your cell line grouped integrated heatmap with dividing line blocks
   heatmap_package <- create_integrated_heatmap(limma_statistics, viability_data, output_dir)
