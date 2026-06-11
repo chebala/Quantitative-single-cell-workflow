@@ -1,14 +1,18 @@
 # Quantitative-single-cell-worflow-cytospin
+
+# Overview
 A base quantitative R based workflow for single cell analysis. The workflow is based on the intensity measurements captured by either olympus slide scanner. This workflow was developed with cytopsin/PFA fixed cell line samples (Untreated/Treated).
 
 In this workflow, the images were processed in QuPath and segmented with Instanseg extension in QuPath. After manually validated the segmentation, the measurements were exported as detections in a CSV file. 
 
+#Filtering
 The workflow comprises two stage of filtering: 
 
 Filter 1: Removes the cells (each row) which lack the intensity measurement for any of the 4(or more) markers. These cells usually contains "NA" instead of a value.
 
 Filter2: As the cells were treated with inhibitors, the cells are likely smaller (pyknotic fragments) or large clumped debris which can be formed due to the cytospin method. To remove these artefacts, the cells were filtered based on nucleus area (µm2) [>1 percentile and <99 percentile].
 
+# Transformation/ Normalization
 As the raw intensities were usually skewed, the raw intesity values were log2(1+x) transformed. 
 
 This normalization can be done with Z-scores [(x-median)/MAD] which I used for correlation analysis.
