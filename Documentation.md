@@ -36,6 +36,3 @@ This is an additional QC step to know better about the data using the PCA plots.
 
 Step 5: Ridge plot 
 
-This is an example output image usign one of the marker (BCL2) with its Z-score. 
-<img width="941" height="627" alt="image" src="https://github.com/user-attachments/assets/784b9db3-174a-4120-97a7-409270e9f99a" />
-
