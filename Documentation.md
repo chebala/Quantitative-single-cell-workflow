@@ -42,7 +42,7 @@ The pipeline screens your computer's local library path against a vector of core
 
 The script calculates exactly which CRAN packages are missing (`setdiff`), installs them along with their upstream dependencies (`dependencies = TRUE`), and skips already installed packages to save processing time.
 
-** 2. Bioconductor Channel**
+**2. Bioconductor Channel**
 The differential expression package **`limma`** is hosted exclusively through Bioconductor and cannot be installed via standard CRAN tools. 
 * **The Fix**: The script identifies if `limma` is present. If missing, it installs the `BiocManager` interface from CRAN first, then automatically downloads `limma` without prompting the user (`update = FALSE, ask = FALSE`).
 
@@ -221,8 +221,7 @@ The `run_cell_line_specific_pca` function processes single-cell matrices through
 * **Smart Downsampling**: Includes a configurable cell ceiling parameter (`max_cells_per_line = 15000`) to subsample huge datasets. This prevents memory bottlenecks and graphical over-plotting while preserving overall population distributions.
 * **Mathematical Centering**: Applies standard R `prcomp` algorithms to center and optionally scale (`scale_flag = TRUE`) log-transformed multiplexed channels.
 
-**Environmental Dependencies
-**
+**Environmental Dependencies**
 The plotting routines look for specific variables and theme components built outside this module's footprint:
 
 1. `treatments`: The standardized vector defining downstream factor level ordering.
@@ -268,7 +267,7 @@ The `generate_ridge_plots` function iterates through a vector of target markers 
 * **Faceting Mechanics**: Splits data windows into isolated columns per `CellLine` with free x-axis scaling to accommodate native cell-line intensity baselines.
 
 
-** Global Environmental Requirements**
+**Global Environmental Requirements**
 
 To preserve pipeline automation, this function dynamically borrows three critical layout variables from your active runtime script workspace:
 
@@ -277,7 +276,7 @@ To preserve pipeline automation, this function dynamically borrows three critica
 3. **`theme_publication()`**: A custom, pre-configured `ggplot2` theme function that clears chart clutter and standardizes fonts.
 
 
-** Output Asset Specifications**
+**Output Asset Specifications**
 
 Running this module outputs isolated image files directly into your specified destination directory:
 
@@ -337,7 +336,7 @@ The `analyze_all_marker_distributions` function acts as a dual-stage non-paramet
 1. **Global Variance Testing**: Computes a separate Kruskal-Wallis $H$ test for each cell line background to confirm significant population variations across all treatments.
 2. **Targeted Post-Hoc Comparisons**: Extracts every treated condition and compares it back directly against its own native `Untreated` baseline via isolated pairwise Wilcoxon Rank-Sum (Mann-Whitney U) operations.
 
-** Statistical Methods & Effect Sizes**
+**Statistical Methods & Effect Sizes**
 
 To balance out the high statistical power driven by massive single-cell event sizes (which can force tiny, meaningless variations to return extreme p-values), this engine couples p-values with strict effect size thresholds:
 
@@ -349,7 +348,7 @@ To balance out the high statistical power driven by massive single-cell event si
   * $r < 0.1$: **Negligible (Sample Size Noise)**
 * **FDR Control**: Pairwise p-values are adjusted within each target marker profiling track using the **Benjamini-Hochberg (BH)** procedure. Significance stars are assigned directly based on adjusted parameters (`***` for $p < 0.001$, `**` for $p < 0.01$, `*` for $p < 0.05$, and `ns` for non-significant markers).
 
-** Output File Specifications**
+**Output File Specifications**
 
 Running the distribution engine writes two distinct summary CSV spreadsheets to your output folder:
 
@@ -357,7 +356,7 @@ Running the distribution engine writes two distinct summary CSV spreadsheets to 
 * Tracks overall variation signatures across all testing channels.
 * Columns: `CellLine`, `Marker`, `kruskal_H` (test statistic), `p_value`, and `df` (degrees of freedom).
 
-** 2. Pairwise Contrast Report** (`single_cell_pairwise_wilcox_results.csv`)
+**2. Pairwise Contrast Report** (`single_cell_pairwise_wilcox_results.csv`)
 * Tracks fine-grained treatment changes relative to localized controls.
 * Columns:
   * `Marker` & `CellLine`: The exact target channel and biological background.
@@ -374,14 +373,14 @@ Running the distribution engine writes two distinct summary CSV spreadsheets to 
 This pipeline module handles advanced multi-omic data integration and downstream interpretation. It joins single-cell protein changes directly with cellular viability profiles on an aligned heatmap matrix, and features a deconvolution engine to untangle fixed-effect interaction terms.
 
 
-** Pipeline Functions Overview**
+**Pipeline Functions Overview**
 
 This part of the analytical framework contains two core downstream processors:
 
 1. **`create_integrated_heatmap`**: Reshapes single-cell regression estimates, fuses them with external bulk `Inhibition` percentage values, transforms viability values into a log2 fold-change format ($Log_2FC$), and renders a cell-line grouped matrix.
 2. **`calculate_true_responses`**: Automates the statistical conversion of regression modifier terms into absolute, isolated fold changes and descriptive Cohen's d effect sizes for individual alternative cell lines.
 
-** Interaction Deconvolution Mathematics**
+**Interaction Deconvolution Mathematics**
 
 Standard R regression summaries output coefficients relative to a reference intercept. Alternative cell line effects are reported strictly as comparative interaction modifiers (`Treatment:CellLine`). To establish the standalone biological response profile of alternative backgrounds, the deconvolution engine implements a recovery calculation:
 
@@ -400,7 +399,7 @@ Running this module saves two distinct assets to the designated destination fold
 * **Visual Annotations**: Row side-bars map cellular viability changes ($Log_2FC$) colored along an Indigo gradient (`#4B0082` to `#E6E6FA`).
 * **Matrix Sizing**: Dimensions are fixed at 2600 × 3000 pixels at a print-ready 300 DPI resolution, segmented by cell line grid break gaps.
 
-** 2. Standalone Response Spreadsheet** (`true_cell_line_isolated_responses.csv`)
+**2. Standalone Response Spreadsheet** (`true_cell_line_isolated_responses.csv`)
 * **`CellLine` & `Treatment`**: Realigned experimental labels with standard hyphen formatting.
 * **`True_Log2FC`**: The calculated real fold-change response.
 * **`True_Cohens_d`**: Deconvoluted standard deviation magnitude tracking.
@@ -408,7 +407,7 @@ Running this module saves two distinct assets to the designated destination fold
 
 
 ## Step 9: Main analysis pipeline ##
-** Main Analysis Pipeline Orchestration Engine**
+**Main Analysis Pipeline Orchestration Engine**
 
 This is the primary orchestration script (`run_analysis`) for the multiplexed immunofluorescence (mIF) single-cell processing pipeline. It standardizes, filters, transforms, models, and visualizes multiplexed cell data inside a single command loop.
 
@@ -428,7 +427,7 @@ Executing `run_analysis` triggers a two-tiered processing pipeline:
 5. **Filter Stage 2**: Filters out low-quality debris using cell size and shape rules (`filter_low_quality_cells`).
 6. **Audit Compilation**: Outputs a cell-retention data sheet and simultaneously loads bulk cellular viability indexes (`import_viability_data`).
 
-** STEP 2: Downstream Analysis Pipelines**
+**STEP 2: Downstream Analysis Pipelines**
 1. **Mathematical Transformation**: Applies a deterministic `log2(x + 1)` scaling formula across all targets.
 2. **Ridge Profiling**: Generates single-cell population density curves (`generate_ridge_plots`).
 3. **Dimensionality Reduction**: Downsamples and runs cell-line isolated Principal Component Analysis (`run_cell_line_specific_pca`).
@@ -472,7 +471,7 @@ The function finishes by packing all data frames, matrices, and statistical indi
 This final code block serves as the user-facing entry point of the pipeline script. It calls the master orchestration engine and saves all processed matrices and statistical arrays directly into your active R global environment.
 
 
-** User Configuration Checklist**
+**User Configuration Checklist**
 
 Before executing the script, verify that your active R session contains the required input paths and parameters. The pipeline expects three variables to be pre-defined in a dedicated **CONFIGURATION** section at the top of your script:
 
