@@ -12,6 +12,9 @@ Filter 1: Removes the cells (each row) which lack the intensity measurement for 
 
 Filter2: As the cells were treated with inhibitors, the cells are likely smaller (pyknotic fragments) or large clumped debris which can be formed due to the cytospin method. To remove these artefacts, the cells were filtered based on nucleus area (µm2) [>1 percentile and <99 percentile].
 
+
+Detailed version can be found in **`Documentation.md`** 
+
 # Transformation/ Normalization
 As the raw intensities were usually skewed, the raw intesity values were log2(1+x) transformed. 
 
