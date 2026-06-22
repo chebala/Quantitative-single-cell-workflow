@@ -281,7 +281,9 @@ extract_marker_intensities <- function(df, markers) {
   
   return(df)
 }
-
+# ===============================================================================
+# 4a. Filter low-quality cells
+# ===============================================================================
 #' Filter low-quality cells
 #' 
 #' Removes cells based on quality criteria
@@ -497,9 +499,7 @@ generate_ridge_plots <- function(df, markers, output_dir) {
 #===============================================================================
 # 6 Single-Cell Mixed effects model
 #===============================================================================
-#' Single-Cell Mixed Effects Statistical Engine with Robust Descriptive Effect Sizes
-#' 
-#' Natively handles individual cells as replicates while computing highly stable 
+#' Single-Cell Mixed Effects Statistical Engine with Robust Descriptive Effect Sizes. 
 #' Cohen's d effect sizes directly from pooled single-cell variances to prevent optim crashes.
 mixed_effect_model <- function(single_cell_df, markers, output_dir) {
   cat("Initializing Single-Cell Mixed-Effects Model Regression with Robust Effect Sizes...\n")
@@ -669,7 +669,7 @@ import_viability_data <- function(viability_file) {
   return(viability_data)
 }
 # ===============================================================================
-# 7b. SINGLE-CELL NON-PARAMETRIC DISTRIBUTION ENGINE
+# 7.NON-PARAMETRIC DISTRIBUTION
 # ===============================================================================
 
 #' Analyze Single-Cell Population Shifts for All Markers
@@ -774,7 +774,7 @@ analyze_all_marker_distributions <- function(single_cell_df, markers, output_dir
 }
 
 # ===============================================================================
-# 8. INTEGRATED HEATMAP ENGINE (SYNCHRONIZED & GAPPED)
+# 8. INTEGRATED HEATMAP 
 # ===============================================================================
 
 create_integrated_heatmap <- function(mixed_results, viability_data, output_dir) {
@@ -966,7 +966,7 @@ calculate_true_responses <- function(mixed_results, output_dir) {
 }
 
 # ===============================================================================
-# 8. MAIN ANALYSIS PIPELINE
+# 9. MAIN ANALYSIS PIPELINE
 # ===============================================================================
 
 #' Run complete analysis workflow
