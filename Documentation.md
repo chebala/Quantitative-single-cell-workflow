@@ -1,7 +1,4 @@
-*The workflow contains 10 stages*
 
-
-*This workflow supports CSV files* 
 
 ## Stage 1: Setup and package loading
 
